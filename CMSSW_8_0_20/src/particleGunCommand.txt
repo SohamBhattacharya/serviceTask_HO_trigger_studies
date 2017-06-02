@@ -1,0 +1,14 @@
+cmsDriver.py Configuration/Generator/python/SingleMuPt100_pythia8_cfi.py \
+    --mc -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,L1Reco \
+    --conditions auto:run2_mc \
+    --datatier GEN-SIM-RAW-DIGI-RECO --eventcontent RAWSIM \
+    --python_filename SingleMuPt100_pythia8_cfi.py -n 50 \
+    --fileout SingleMuPt100_pythia8.root --no_exec
+
+
+cmsDriver.py Configuration/Generator/python/SingleMuPt100_cfi.py \
+    --mc -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,L1Reco \
+    --conditions auto:run2_mc \
+    --datatier GEN-SIM-RAW-DIGI-RECO --eventcontent RAWSIM \
+    --python_filename SingleMuPt100_cfi.py -n 50 \
+    --fileout SingleMuPt100.root --no_exec
