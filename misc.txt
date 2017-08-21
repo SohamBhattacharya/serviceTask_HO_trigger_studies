@@ -1,1 +1,3 @@
-Muon RPC Digi label: muonRPCDigis
+rsync -asP sobhatta@ui.indiacms.res.in:/home/sobhatta/t3store/serviceTask_HO_trigger_studies/CMSSW_8_0_20/src/Efficiency/output/SingleMuon/DTNtuple_all_efficiency.root CMSSW_8_0_20/src/Efficiency/output/SingleMuon/
+
+rsync -asP --exclude "*output*" --exclude "*.root" --exclude "*log*" --exclude "*.pyc" ./CMSSW_8_0_20/src/* sobhatta@ui.indiacms.res.in:/home/sobhatta/t3store/serviceTask_HO_trigger_studies/CMSSW_8_0_20/src/

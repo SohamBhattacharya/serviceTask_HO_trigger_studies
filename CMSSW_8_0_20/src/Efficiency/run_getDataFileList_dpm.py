@@ -3,7 +3,8 @@ import subprocess
 
 
 dictionary = [ \
-    ["", "SingleMuon"]
+    #["", "SingleMuon"]
+    ["", "ZeroBias9"]
 ]
 
 
@@ -15,7 +16,8 @@ for iEntry in range(0, len(dictionary)) :
     
     print "Getting file list:", dictionary[iEntry][1]
     
-    crabDir = "/home/sobhatta/t3store/serviceTask_HO_trigger_studies/CMSSW_9_0_1/src/crabJobs/crab_" + dictionary[iEntry][1]
+    #crabDir = "/home/sobhatta/t3store/serviceTask_HO_trigger_studies/CMSSW_9_0_1/src/crabJobs/crab_" + dictionary[iEntry][1]
+    crabDir = "/home/sobhatta/t3store/serviceTask_HO_trigger_studies/CMSSW_9_2_2/src/crabJobs/crab_" + dictionary[iEntry][1]
     
     # For python >= 2.7
     #crabStatus = subprocess.check_output(["crab", "status", crabDir]).split("\n")

@@ -50,14 +50,12 @@ process.load("RecoLuminosity.LumiProducer.lumiProducer_cfi")
 process.load("EventFilter.L1TRawToDigi.bmtfDigis_cfi")
 
 #maxEvents = -1
-maxEvents = 10 * pow(10, 3)
+#maxEvents = 10 * pow(10, 3)
+maxEvents = 10
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxEvents))
 
-process.source = cms.Source("PoolSource",
-
-
-fileNames = cms.untracked.vstring(
+sourceFileNames = cms.untracked.vstring([
     # DAS name: /ExpressPhysics/Run2016H-Express-v2/FEVT
     #"root://cms-xrd-global.cern.ch//store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/283/820/00000/000BE88F-ED97-E611-B962-02163E011D7E.root",
     #"root://cms-xrd-global.cern.ch//store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/283/820/00000/0092B080-0798-E611-AD7E-02163E01184D.root",
@@ -76,8 +74,23 @@ fileNames = cms.untracked.vstring(
     "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/F6FCD1FE-549F-E611-8047-02163E0146C3.root",
     "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/FA77BCF4-549F-E611-A9F2-FA163EBCA43B.root",
     "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/FE558300-559F-E611-8C24-02163E012172.root",
-),
-secondaryFileNames = cms.untracked.vstring()
+])
+
+
+#Das name: /SingleMuon/Run2017A-ZMu-PromptReco-v2/RAW-RECO
+sourceFile = "sourceFiles/SingleMuon/SingleMuon-Run2017A-ZMu-PromptReco-v2-RAW-RECO.txt"
+
+#fNames = ""
+#with open(sourceFile) as f:
+#    
+#    fNames = f.readlines()
+#
+#sourceFileNames = cms.untracked.vstring(fNames)
+
+
+process.source = cms.Source("PoolSource",
+    fileNames = sourceFileNames,
+    secondaryFileNames = cms.untracked.vstring()
 )
 
 #this is to select collisions
@@ -143,8 +156,8 @@ process.p = cms.Path( \
     process.hcalDigis + \
     process.myDTNtuple)
 
-# Output
 
+# Output
 process.TFileService = cms.Service("TFileService", fileName = cms.string("DTNtuple.root"))
 
 #process.out = cms.OutputModule("PoolOutputModule", 
@@ -157,4 +170,12 @@ process.TFileService = cms.Service("TFileService", fileName = cms.string("DTNtup
 #    SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("p"))
 #)
 
+process.schedule = cms.Schedule(process.p)
 
+# Debug
+#process.out = cms.OutputModule("PoolOutputModule", 
+#    fileName = cms.untracked.string("debug.root")
+#)
+#
+#process.output_step = cms.EndPath(process.out)
+#process.schedule.extend([process.output_step])

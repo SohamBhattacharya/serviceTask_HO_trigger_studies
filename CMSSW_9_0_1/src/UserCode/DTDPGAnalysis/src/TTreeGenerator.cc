@@ -73,6 +73,9 @@
 #include "Geometry/DTGeometry/interface/DTTopology.h" // New trying to avoid crashes in the topology functions
 #include <DataFormats/MuonDetId/interface/DTLayerId.h> // New trying to avoid crashes in the topology functions
 
+
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
+
 #include "MagneticField/Engine/interface/MagneticField.h"
 
 #include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
@@ -396,7 +399,7 @@ void TTreeGenerator::analyze(const edm::Event& event, const edm::EventSetup& con
     if(runOnRaw_ && hasThetaTwinMux) fill_twinmuxth_variables(localTriggerTwinMux_Th);
 
     //MUONS
-    if(!localDTmuons_) fill_muons_variables(MuList);
+    if(!localDTmuons_) fill_muons_variables(MuList, privtxs);
 
     //GMT
     if(!localDTmuons_) fill_gmt_variables(gmt); // legacy
@@ -858,7 +861,7 @@ int TTreeGenerator::getIeta(std::vector<L1MuDTChambThDigi>::const_iterator digi_
     return -99;
 }
 
-void TTreeGenerator::fill_muons_variables(edm::Handle<reco::MuonCollection> MuList)
+void TTreeGenerator::fill_muons_variables(edm::Handle<reco::MuonCollection> MuList, edm::Handle<reco::VertexCollection> privtxs)
 {
     imuons = 0;
     for (reco::MuonCollection::const_iterator nmuon = MuList->begin(); nmuon != MuList->end(); ++nmuon){
@@ -867,6 +870,8 @@ void TTreeGenerator::fill_muons_variables(edm::Handle<reco::MuonCollection> MuLi
        const reco::TrackRef mutrackref = nmuon->outerTrack();
        STAMu_isMuGlobal.push_back(nmuon->isGlobalMuon());
        STAMu_isMuTracker.push_back(nmuon->isTrackerMuon());
+       STAMu_isMuTight.push_back(muon::isTightMuon(*nmuon, (*privtxs)[0]));
+       //printf("muon %d: isTight %d \n", imuons, muon::isTightMuon(*nmuon, (*privtxs)[0]));
        STAMu_numberOfChambers.push_back(nmuon->numberOfChambers());
        STAMu_numberOfMatches.push_back(nmuon->numberOfMatches());
        STAMu_numberOfHits.push_back(mutrackref->numberOfValidHits());
@@ -1396,11 +1401,14 @@ void TTreeGenerator::beginJob()
     tree_->Branch("ltTwinMux_thStation",&ltTwinMux_thStation);
     tree_->Branch("ltTwinMux_thBx",&ltTwinMux_thBx);
     tree_->Branch("ltTwinMux_thHits",&ltTwinMux_thHits);
+    tree_->Branch("ltTwinMux_thPosition",&ltTwinMux_thPosition
+    tree_->Branch("ltTwinMux_thQuality",&ltTwinMux_thQuality);
     tree_->Branch("ltTwinMux_thIeta",&ltTwinMux_thIeta);
 
     //muon variables
     tree_->Branch("Mu_isMuGlobal",&STAMu_isMuGlobal);
     tree_->Branch("Mu_isMuTracker",&STAMu_isMuTracker);
+    tree_->Branch("Mu_isMuTight",&STAMu_isMuTight);
     tree_->Branch("Mu_numberOfChambers_sta",&STAMu_numberOfChambers);
     tree_->Branch("Mu_numberOfMatches_sta",&STAMu_numberOfMatches);
     tree_->Branch("Mu_numberOfHits_sta",&STAMu_numberOfHits);
@@ -1651,11 +1659,14 @@ inline void TTreeGenerator::clear_Arrays()
     ltTwinMux_thStation.clear();
     ltTwinMux_thBx.clear();
     ltTwinMux_thHits.clear();
+    ltTwinMux_thPosition.clear();
+    ltTwinMux_thQuality.clear();
     ltTwinMux_thIeta.clear();
 
     //muon variables
     STAMu_isMuGlobal.clear();
     STAMu_isMuTracker.clear();
+    STAMu_isMuTight.clear();
     STAMu_numberOfChambers.clear();
     STAMu_numberOfMatches.clear();
     STAMu_numberOfHits.clear();

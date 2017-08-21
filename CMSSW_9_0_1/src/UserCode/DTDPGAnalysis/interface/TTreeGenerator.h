@@ -12,7 +12,7 @@
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -69,7 +69,7 @@ private:
   void fill_twinmuxout_variables(edm::Handle<L1MuDTChambPhContainer> localTriggerTwinMuxOut);
   void fill_twinmuxin_variables(edm::Handle<L1MuDTChambPhContainer> localTriggerTwinMuxIn);
   void fill_twinmuxth_variables(edm::Handle<L1MuDTChambThContainer> localTriggerTwinMux_Th);
-  void fill_muons_variables(edm::Handle<reco::MuonCollection> MuList);
+  void fill_muons_variables(edm::Handle<reco::MuonCollection> MuList, edm::Handle<reco::VertexCollection> privtxs);
   void fill_gmt_variables(const edm::Handle<l1t::MuonBxCollection> & gmt);
   void fill_gt_variables(edm::Handle<L1GlobalTriggerReadoutRecord> gtrr, const L1GtTriggerMenu* menu);
   void fill_hlt_variables(const edm::Event& e, edm::Handle<edm::TriggerResults> hltresults);
@@ -81,6 +81,10 @@ private:
   void analyzeUnpackingRpcRecHit(const edm::Event& e);
   
   int getIeta(std::vector<L1MuDTChambThDigi>::const_iterator digi_L1MuDTChambTh);
+  int getIeta( \
+    std::vector<L1MuDTChambThDigi>::const_iterator digi_L1MuDTChambTh, \
+    int pos);
+    
   int getIphi(std::vector<L1MuDTChambPhDigi>::const_iterator digi_L1MuDTChambPh);
 
   TrajectoryStateOnSurface cylExtrapTrkSam(reco::TrackRef track, const float rho) const;

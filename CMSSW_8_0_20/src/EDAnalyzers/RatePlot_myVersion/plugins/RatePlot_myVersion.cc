@@ -115,24 +115,24 @@ class Output
         
         sprintf(name, "addTrack1_pT");
         sprintf(title, "addTrack1_pT");
-        h_addTrack1_pT = dir.make <TH1F> (name, title, 40, 0, 40);
+        h_addTrack1_pT = dir.make <TH1F> (name, title, 500, 0, 500);
         
         sprintf(name, "addTrack2_pT");
         sprintf(title, "addTrack2_pT");
-        h_addTrack2_pT = dir.make <TH1F> (name, title, 40, 0, 40);
+        h_addTrack2_pT = dir.make <TH1F> (name, title, 500, 0, 500);
         
         
         sprintf(name, "PU_vs_addTrack1_pT");
         sprintf(title, "PU_vs_addTrack1_pT");
-        h_PU_vs_addTrack1_pT = dir.make <TH2F> (name, title, 40, 0, 40, 3000, 30, 60);
+        h_PU_vs_addTrack1_pT = dir.make <TH2F> (name, title, 500, 0, 500, 3000, 30, 60);
         
         sprintf(name, "PU_vs_addTrack2_pT");
         sprintf(title, "PU_vs_addTrack2_pT");
-        h_PU_vs_addTrack2_pT = dir.make <TH2F> (name, title, 40, 0, 40, 3000, 30, 60);
+        h_PU_vs_addTrack2_pT = dir.make <TH2F> (name, title, 500, 0, 500, 3000, 30, 60);
         
         sprintf(name, "PU_vs_addTrackAll_pT");
         sprintf(title, "PU_vs_addTrackAll_pT");
-        h_PU_vs_addTrackAll_pT = dir.make <TH2F> (name, title, 40, 0, 40, 3000, 30, 60);
+        h_PU_vs_addTrackAll_pT = dir.make <TH2F> (name, title, 500, 0, 500, 3000, 30, 60);
         
         
         sprintf(name, "PU_vs_addTrack1_eta");
@@ -248,12 +248,12 @@ RatePlot_myVersion::RatePlot_myVersion(const edm::ParameterSet& iConfig)
     
     h_eventsPerPileUp = fs->make <TH1F> ("eventsPerPileUp", "eventsPerPileUp", 3000, 30, 60);
     
-    h_bmtfTrack1_pT = fs->make < TH1F > ("bmtfTrack1_pT", "bmtfTrack1_pT", 40, 0, 40);
-    h_bmtfTrack2_pT = fs->make < TH1F > ("bmtfTrack2_pT", "bmtfTrack2_pT", 40, 0, 40);
+    h_bmtfTrack1_pT = fs->make < TH1F > ("bmtfTrack1_pT", "bmtfTrack1_pT", 500, 0, 500);
+    h_bmtfTrack2_pT = fs->make < TH1F > ("bmtfTrack2_pT", "bmtfTrack2_pT", 500, 0, 500);
     
-    h_PU_vs_bmtfTrack1_pT = fs->make <TH2F> ("PU_vs_bmtfTrack1_pT", "PU_vs_bmtfTrack1_pT", 40, 0, 40, 3000, 30, 60);
-    h_PU_vs_bmtfTrack2_pT = fs->make <TH2F> ("PU_vs_bmtfTrack2_pT", "PU_vs_bmtfTrack2_pT", 40, 0, 40, 3000, 30, 60);
-    h_PU_vs_bmtfTrackAll_pT = fs->make <TH2F> ("PU_vs_bmtfTrackAll_pT", "PU_vs_bmtfTrackAll_pT", 40, 0, 40, 3000, 30, 60);
+    h_PU_vs_bmtfTrack1_pT = fs->make <TH2F> ("PU_vs_bmtfTrack1_pT", "PU_vs_bmtfTrack1_pT", 500, 0, 500, 3000, 30, 60);
+    h_PU_vs_bmtfTrack2_pT = fs->make <TH2F> ("PU_vs_bmtfTrack2_pT", "PU_vs_bmtfTrack2_pT", 500, 0, 500, 3000, 30, 60);
+    h_PU_vs_bmtfTrackAll_pT = fs->make <TH2F> ("PU_vs_bmtfTrackAll_pT", "PU_vs_bmtfTrackAll_pT", 500, 0, 500, 3000, 30, 60);
     
     h_PU_vs_bmtfTrack1_eta = fs->make <TH2F> ("PU_vs_bmtfTrack1_eta", "PU_vs_bmtfTrack1_eta", 34, -1.5, 1.5, 3000, 30, 60);
     h_PU_vs_bmtfTrack2_eta = fs->make <TH2F> ("PU_vs_bmtfTrack2_eta", "PU_vs_bmtfTrack2_eta", 34, -1.5, 1.5, 3000, 30, 60);

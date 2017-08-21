@@ -15,7 +15,8 @@ cmsRunFileName = "UserCode/DTDPGAnalysis/test/RunTree_collisions_cfg.py"
 
 dictionary["ZeroBiasBunchTrains"] = [ \
     #"/ExpressPhysics/Run2016H-Express-v2/FEVT",
-    "/SingleMuon/Run2016H-ZMu-PromptReco-v2/RAW-RECO"
+    "/SingleMuon/Run2016H-ZMu-PromptReco-v2/RAW-RECO",
+    #"/SingleMuon/Run2017A-ZMu-PromptReco-v2/RAW-RECO",
 ]
 
 
