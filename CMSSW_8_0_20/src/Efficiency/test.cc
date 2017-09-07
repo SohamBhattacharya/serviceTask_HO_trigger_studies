@@ -26,5 +26,7 @@ int main()
     
     std::cout << (1.0 == 1) << "\n";
     
+    //std::cout << (false > 0.5) << "\n";
+    
     return 0;
 }

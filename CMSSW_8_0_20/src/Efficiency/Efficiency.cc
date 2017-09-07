@@ -29,10 +29,13 @@ double deltaRcut = 0.4;
 double deltaPhiCut = 0.4;
 
 double DT_deltaPhicut = 0.4;
+int MB1_pTcut = 10;
 int MB1_HO_deltaIphiCut = 1;
 int MB1_HO_deltaSectorCut = 1;
 int MB1_HO_deltaIetaCut = 1;
 int MB1_HO_deltaWheelCut = 0;
+
+int MB2_HO_deltaIphiCut = 1;
 
 int DTsegment_nHit_phiLocal_min = 4;
 int DTsegment_phiLocal_max = 45; // degree
@@ -49,6 +52,8 @@ int isolatedMB1_n_HQ_deltaTimeMatching = 0;
 int isolatedMB1_n_LQ_noTimeMatching = 0;
 int isolatedMB1_n_HQ_noTimeMatching = 0;
 
+int MB1_phiLocal_wrapAround = 2048;
+
 int HOTP_bits_SOI = 8;
 
 std::vector <int> v_runNumber;
@@ -61,7 +66,14 @@ std::vector <double> v_pT;
 std::map <long, std::map <int, std::vector <int> > > m_MB1_LQ;
 std::map <long, std::map <int, std::vector <int> > > m_MB1_HQ;
 
-std::vector <int> v_pTcut = {0, 5, 10, 14, 18, 22};
+// <run, <event_n, 
+//        MB2_n, MB2_wh+1_n, MB2_wh-1_n,
+//        HO_SOI_n, HO_SOI_iEta+4_n, HO_SOI_iEta+4_MB2_wh+1_n, HO_SOI_iEta+4_MB2_wh-1_n, 
+//        HO_SOI_iEta-4_n, HO_SOI_iEta-4_MB2_wh-1_n, HO_SOI_iEta-4_MB2_wh+1_n> >
+std::map <long, std::vector <int> > m_MB2_LQ;
+std::map <long, std::vector <int> > m_MB2_HQ;
+
+std::vector <int> v_pTcut = {0, 5, 10, 14, 18, 22, 25, 30};
 
 int DT_phi_max = 0;
 int DT_phi_min = 0;
@@ -380,6 +392,9 @@ class OutputData
     TH1F *h1_MB1DTTP_deltaPhi;
     TH1F *h1_MB1DTTP_pT;
     
+    TH2F *h2_MB1DTTP_pT_vs_deltaPhi;
+    TH2F *h2_MB1DTTP_pT_vs_phiB;
+    
     TH1F *h1_unisolatedMB1DTTP_deltaBX;
     TH1F *h1_unisolatedMB1DTTP_deltaPhi;
     
@@ -389,6 +404,7 @@ class OutputData
     TH2F *h2_unisolatedMB1DTTP_deltaBX_vs_deltaPhi;
     TH2F *h2_unisolatedMB1DTTP_pT_vs_deltaPhi;
     TH2F *h2_unisolatedMB1DTTP_pT_vs_phiB;
+    TH2F *h2_unisolatedMB1DTTP_HOTP_pT_vs_deltaIphi;
     TH2F *h2_unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel;
     TH2F *h2_unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaIeta;
     TH2F *h2_unisolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel;
@@ -407,6 +423,7 @@ class OutputData
     TH1F *h1_isolatedMB1DTTP_HOTP_pT;
     
     TH2F *h2_isolatedMB1DTTP_pT_vs_phiB;
+    TH2F *h2_isolatedMB1DTTP_HOTP_pT_vs_deltaIphi;
     TH2F *h2_isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel;
     TH2F *h2_isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaIeta;
     TH2F *h2_isolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel;
@@ -607,6 +624,14 @@ class OutputData
         sprintf(histTitle, "MB1DTTP_pT");
         h1_MB1DTTP_pT = new TH1F(histName, histTitle, 200, 0, 200);
         
+        sprintf(histName, "MB1DTTP_pT_vs_deltaPhi");
+        sprintf(histTitle, "MB1DTTP_pT_vs_deltaPhi");
+        h2_MB1DTTP_pT_vs_deltaPhi = new TH2F(histName, histTitle, (int) (2.0*5/binWidth_phi), -5, 5, 200, 0, 200);
+        
+        sprintf(histName, "MB1DTTP_pT_vs_phiB");
+        sprintf(histTitle, "MB1DTTP_pT_vs_phiB");
+        h2_MB1DTTP_pT_vs_phiB = new TH2F(histName, histTitle, 1200, -600, 600, 200, 0, 200);
+        
         sprintf(histName, "unisolatedMB1DTTP_deltaBX");
         sprintf(histTitle, "unisolatedMB1DTTP_deltaBX");
         h1_unisolatedMB1DTTP_deltaBX = new TH1F(histName, histTitle, 10, 0, 10);
@@ -635,6 +660,10 @@ class OutputData
         sprintf(histTitle, "unisolatedMB1DTTP_pT_vs_phiB");
         h2_unisolatedMB1DTTP_pT_vs_phiB = new TH2F(histName, histTitle, 1200, -600, 600, 200, 0, 200);
         
+        sprintf(histName, "unisolatedMB1DTTP_HOTP_pT_vs_deltaIphi");
+        sprintf(histTitle, "unisolatedMB1DTTP_HOTP_pT_vs_deltaIphi");
+        h2_unisolatedMB1DTTP_HOTP_pT_vs_deltaIphi = new TH2F(histName, histTitle, 20, -10, 10, 200, 0, 200);
+        
         sprintf(histName, "unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel");
         sprintf(histTitle, "unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel");
         h2_unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel = new TH2F(histName, histTitle, 10, -5, 5, 20, -10, 10);
@@ -653,7 +682,7 @@ class OutputData
         
         sprintf(histName, "unisolatedMB1DTTP_vs_HOTP_phiLocal");
         sprintf(histTitle, "unisolatedMB1DTTP_vs_HOTP_phiLocal");
-        h2_unisolatedMB1DTTP_vs_HOTP_phiLocal = new TH2F(histName, histTitle, 10, 0, 10, 5000, -2500, 2500);
+        h2_unisolatedMB1DTTP_vs_HOTP_phiLocal = new TH2F(histName, histTitle, 10, 0, 10, 7000, -3000, 4000);
         
         sprintf(histName, "unisolatedMB1DTTP_vs_HOTP_iEta");
         sprintf(histTitle, "unisolatedMB1DTTP_vs_HOTP_iEta");
@@ -693,6 +722,10 @@ class OutputData
         sprintf(histTitle, "isolatedMB1DTTP_pT_vs_phiB");
         h2_isolatedMB1DTTP_pT_vs_phiB = new TH2F(histName, histTitle, 1200, -600, 600, 200, 0, 200);
         
+        sprintf(histName, "isolatedMB1DTTP_HOTP_pT_vs_deltaIphi");
+        sprintf(histTitle, "isolatedMB1DTTP_HOTP_pT_vs_deltaIphi");
+        h2_isolatedMB1DTTP_HOTP_pT_vs_deltaIphi = new TH2F(histName, histTitle, 20, -10, 10, 200, 0, 200);
+        
         sprintf(histName, "isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel");
         sprintf(histTitle, "isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel");
         h2_isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel = new TH2F(histName, histTitle, 10, -5, 5, 20, -10, 10);
@@ -715,7 +748,7 @@ class OutputData
         
         sprintf(histName, "isolatedMB1DTTP_vs_HOTP_phiLocal");
         sprintf(histTitle, "isolatedMB1DTTP_vs_HOTP_phiLocal");
-        h2_isolatedMB1DTTP_vs_HOTP_phiLocal = new TH2F(histName, histTitle, 10, 0, 10, 5000, -2500, 2500);
+        h2_isolatedMB1DTTP_vs_HOTP_phiLocal = new TH2F(histName, histTitle, 10, 0, 10, 7000, -3000, 4000);
         
         sprintf(histName, "isolatedMB1DTTP_vs_HOTP_iEta");
         sprintf(histTitle, "isolatedMB1DTTP_vs_HOTP_iEta");
@@ -799,6 +832,9 @@ class OutputData
         h1_MB1DTTP_deltaPhi->Write();
         h1_MB1DTTP_pT->Write();
         
+        h2_MB1DTTP_pT_vs_deltaPhi->Write();
+        h2_MB1DTTP_pT_vs_phiB->Write();
+        
         h1_unisolatedMB1DTTP_deltaBX->Write();
         h1_unisolatedMB1DTTP_deltaPhi->Write();
         h1_unisolatedMB1DTTP_pT->Write();
@@ -807,6 +843,7 @@ class OutputData
         h2_unisolatedMB1DTTP_deltaBX_vs_deltaPhi->Write();
         h2_unisolatedMB1DTTP_pT_vs_deltaPhi->Write();
         h2_unisolatedMB1DTTP_pT_vs_phiB->Write();
+        h2_unisolatedMB1DTTP_HOTP_pT_vs_deltaIphi->Write();
         h2_unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel->Write();
         h2_unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaIeta->Write();
         h2_unisolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel->Write();
@@ -823,6 +860,7 @@ class OutputData
         h1_isolatedMB1DTTP_HOTP_pT->Write();
         
         h2_isolatedMB1DTTP_pT_vs_phiB->Write();
+        h2_isolatedMB1DTTP_HOTP_pT_vs_deltaIphi->Write();
         h2_isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel->Write();
         h2_isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaIeta->Write();
         h2_isolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel->Write();
@@ -898,6 +936,9 @@ class OutputData
         delete h1_MB1DTTP_deltaPhi;
         delete h1_MB1DTTP_pT;
         
+        delete h2_MB1DTTP_pT_vs_deltaPhi;
+        delete h2_MB1DTTP_pT_vs_phiB;
+        
         delete h1_unisolatedMB1DTTP_deltaBX;
         delete h1_unisolatedMB1DTTP_deltaPhi;
         delete h1_unisolatedMB1DTTP_pT;
@@ -906,6 +947,7 @@ class OutputData
         delete h2_unisolatedMB1DTTP_deltaBX_vs_deltaPhi;
         delete h2_unisolatedMB1DTTP_pT_vs_deltaPhi;
         delete h2_unisolatedMB1DTTP_pT_vs_phiB;
+        delete h2_unisolatedMB1DTTP_HOTP_pT_vs_deltaIphi;
         delete h2_unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel;
         delete h2_unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaIeta;
         delete h2_unisolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel;
@@ -922,6 +964,7 @@ class OutputData
         delete h1_isolatedMB1DTTP_HOTP_pT;
         
         delete h2_isolatedMB1DTTP_pT_vs_phiB;
+        delete h2_isolatedMB1DTTP_HOTP_pT_vs_deltaIphi;
         delete h2_isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel;
         delete h2_isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaIeta;
         delete h2_isolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel;
@@ -962,6 +1005,9 @@ double getPtFromPhiB(int PhiB);
 
 void updateCounterMap(std::map <long, std::map <int, std::vector <int> > > *myMap, long runNumber, int pos);
 void updateCounterMap(std::map <long, std::map <int, std::vector <int> > > *myMap, long runNumber, int pos, double pT);
+
+void writeCsv_MB1(std::string textFileName, std::map <long, std::map <int, std::vector <int> > > *myMap, int pTcut);
+void writeCsv_MB2(std::string textFileName, std::map <long, std::vector <int> > *myMap);
 
 
 int main()
@@ -1065,103 +1111,160 @@ int main()
         printf("\n");
     }
     
+    char textFileName[500];
+    
     for(int iPtCut = 0; iPtCut < v_pTcut.size(); iPtCut++)
     {
         int pTcut = v_pTcut.at(iPtCut);
         
-        char textFileName[500];
-        sprintf(textFileName, "%s/isolatedMB1_pT%d.txt", outputDir, pTcut);
-        FILE *textFile = fopen(textFileName, "w");
+        sprintf(textFileName, "%s/isolatedMB1_LQ_pT%d.txt", outputDir, pTcut);
+        writeCsv_MB1(textFileName, &m_MB1_LQ, pTcut);
         
-        std::map <long, std::map <int, std::vector <int> > >::iterator iEle_LQ = m_MB1_LQ.begin();
-        std::map <long, std::map <int, std::vector <int> > >::iterator iEle_HQ = m_MB1_HQ.begin();
-        
-        fprintf(textFile, \
-            "#runNumber,lumi per LS (/fb),"
-            "nEvent,"
-            
-            "HOTP,HOTP_SOI,rate_HOTP_SOI [kHz],"
-            
-            //
-            "MB1_LQ,rate_MB1_LQ [kHz],"
-            
-            "isolatedMB1_LQ,rate_isolatedMB1_LQ [kHz],"
-            "isolatedMB1_LQ_withHOTP_SOI,rate_isolatedMB1_LQ_withHOTP_SOI [kHz],"
-            
-            "unisolatedMB1_LQ,rate_unisolatedMB1_LQ [kHz],"
-            "unisolatedMB1_LQ_withHOTP_SOI,rate_unisolatedMB1_LQ_withHOTP_SOI [kHz],"
-            
-            //
-            "MB1_HQ,rate_MB1_HQ [kHz],"
-            
-            "isolatedMB1_HQ,rate_isolatedMB1_HQ [kHz],"
-            "isolatedMB1_HQ_withHOTP_SOI,rate_isolatedMB1_HQ_withHOTP_SOI [kHz],"
-            
-            "unisolatedMB1_HQ,rate_unisolatedMB1_HQ [kHz],"
-            "unisolatedMB1_HQ_withHOTP_SOI,rate_unisolatedMB1_HQ_withHOTP_SOI [kHz]"
-        );
-        
-        fprintf(textFile, "\n");
-        
-        for(;iEle_LQ != m_MB1_LQ.end(); iEle_LQ++, iEle_HQ++)
-        {
-            fprintf(textFile, \
-                "%d,%f,"
-                "%d,"
-                
-                "%d,%d,%f,"
-                
-                //
-                "%d,%f,"
-                
-                "%d,%f,"
-                "%d,%f,"
-                
-                "%d,%f,"
-                "%d,%f,"
-                
-                //
-                "%d,%f,"
-                
-                "%d,%f,"
-                "%d,%f,"
-                
-                "%d,%f,"
-                "%d,%f", \
-                
-                iEle_LQ->first, getLumi(iEle_LQ->first), \
-                iEle_LQ->second[pTcut].at(0), \
-                
-                iEle_LQ->second[pTcut].at(4), iEle_LQ->second[pTcut].at(5), (double) iEle_LQ->second[pTcut].at(5) / iEle_LQ->second[pTcut].at(0) * 40.0*1000.0, \
-                
-                //
-                iEle_LQ->second[pTcut].at(1), (double) iEle_LQ->second[pTcut].at(1) / iEle_LQ->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
-                
-                iEle_LQ->second[pTcut].at(2), (double) iEle_LQ->second[pTcut].at(2) / iEle_LQ->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
-                iEle_LQ->second[pTcut].at(6), (double) iEle_LQ->second[pTcut].at(6) / iEle_LQ->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
-                
-                iEle_LQ->second[pTcut].at(3), (double) iEle_LQ->second[pTcut].at(3) / iEle_LQ->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
-                iEle_LQ->second[pTcut].at(7), (double) iEle_LQ->second[pTcut].at(7) / iEle_LQ->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
-                
-                //
-                iEle_HQ->second[pTcut].at(1), (double) iEle_HQ->second[pTcut].at(1) / iEle_HQ->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
-                
-                iEle_HQ->second[pTcut].at(2), (double) iEle_HQ->second[pTcut].at(2) / iEle_HQ->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
-                iEle_HQ->second[pTcut].at(6), (double) iEle_HQ->second[pTcut].at(6) / iEle_HQ->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
-                
-                iEle_HQ->second[pTcut].at(3), (double) iEle_HQ->second[pTcut].at(3) / iEle_HQ->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
-                iEle_HQ->second[pTcut].at(7), (double) iEle_HQ->second[pTcut].at(7) / iEle_HQ->second[pTcut].at(0) / 3.0 * 40.0*1000.0
-            );
-            
-            fprintf(textFile, "\n");
-        }
-        
-        fclose(textFile);
+        sprintf(textFileName, "%s/isolatedMB1_HQ_pT%d.txt", outputDir, pTcut);
+        writeCsv_MB1(textFileName, &m_MB1_HQ, pTcut);
     }
+    
+    sprintf(textFileName, "%s/MB2_LQ.txt", outputDir);
+    writeCsv_MB2(textFileName, &m_MB2_LQ);
+    
+    sprintf(textFileName, "%s/MB2_HQ.txt", outputDir);
+    writeCsv_MB2(textFileName, &m_MB2_HQ);
     
     printf("\n\nDT_phi_min %d, DT_phi_max %d\n", DT_phi_min, DT_phi_max);
     
     return 0;
+}
+
+
+void writeCsv_MB1(std::string textFileName, std::map <long, std::map <int, std::vector <int> > > *myMap, int pTcut)
+{
+    FILE *textFile = fopen(textFileName.c_str(), "w");
+    
+    std::map <long, std::map <int, std::vector <int> > >::iterator iEle_myMap = myMap->begin();
+    
+    fprintf(textFile, \
+        "#runNumber,lumi per LS (/fb),"
+        "nEvent,"
+        
+        "HO,HO_SOI,rate_HO_SOI [kHz],"
+        
+        "MB1,rate_MB1 [kHz],"
+        
+        "isolatedMB1,rate_isolatedMB1 [kHz],"
+        "isolatedMB1_withHO_SOI,rate_isolatedMB1_withHO_SOI [kHz],"
+        
+        "unisolatedMB1,rate_unisolatedMB1 [kHz],"
+        "unisolatedMB1_withHO_SOI,rate_unisolatedMB1_withHO_SOI [kHz]"
+    );
+    
+    fprintf(textFile, "\n");
+    
+    for(;iEle_myMap != myMap->end(); iEle_myMap++)
+    {
+        fprintf(textFile, \
+            "%ld,%f,"
+            "%d,"
+            
+            "%d,%d,%f,"
+            
+            "%d,%f,"
+            
+            "%d,%f,"
+            "%d,%f,"
+            
+            "%d,%f,"
+            "%d,%f", \
+            
+            iEle_myMap->first, getLumi(iEle_myMap->first), \
+            iEle_myMap->second[pTcut].at(0), \
+            
+            iEle_myMap->second[pTcut].at(4), iEle_myMap->second[pTcut].at(5), (double) iEle_myMap->second[pTcut].at(5) / iEle_myMap->second[pTcut].at(0) * 40.0*1000.0, \
+            
+            iEle_myMap->second[pTcut].at(1), (double) iEle_myMap->second[pTcut].at(1) / iEle_myMap->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
+            
+            iEle_myMap->second[pTcut].at(2), (double) iEle_myMap->second[pTcut].at(2) / iEle_myMap->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
+            iEle_myMap->second[pTcut].at(6), (double) iEle_myMap->second[pTcut].at(6) / iEle_myMap->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
+            
+            iEle_myMap->second[pTcut].at(3), (double) iEle_myMap->second[pTcut].at(3) / iEle_myMap->second[pTcut].at(0) / 3.0 * 40.0*1000.0, \
+            iEle_myMap->second[pTcut].at(7), (double) iEle_myMap->second[pTcut].at(7) / iEle_myMap->second[pTcut].at(0) / 3.0 * 40.0*1000.0
+        );
+        
+        fprintf(textFile, "\n");
+    }
+    
+    fclose(textFile);
+}
+
+
+void writeCsv_MB2(std::string textFileName, std::map <long, std::vector <int> > *myMap)
+{
+    FILE *textFile = fopen(textFileName.c_str(), "w");
+    
+    std::map <long, std::vector <int> >::iterator iEle_myMap = myMap->begin();
+    
+    fprintf(textFile, \
+        "#runNumber,lumi per LS (/fb),"
+        "nEvent,"
+        
+        "HO_SOI,"
+        "HO_SOI_iEta+4,"
+        "HO_SOI_iEta-4,"
+        
+        "MB2,"
+        "MB2_wh+1,"
+        "MB2_wh-1,"
+        
+        "HO_SOI_iEta+4_MB2_wh+1_ringCrosser,"
+        "HO_SOI_iEta+4_MB2_wh-1_fakeRingCrosser,"
+        
+        "HO_SOI_iEta-4_MB2_wh-1_ringCrosser,"
+        "HO_SOI_iEta-4_MB2_wh+1_fakeRingCrosser"
+    );
+    
+    fprintf(textFile, "\n");
+    
+    for(;iEle_myMap != myMap->end(); iEle_myMap++)
+    {
+        fprintf(textFile, \
+            "%ld,%f,"
+            "%d,"
+            
+            "%d,"
+            "%d,"
+            "%d,"
+            
+            "%d,"
+            "%d,"
+            "%d,"
+            
+            "%d,"
+            "%d,"
+            
+            "%d,"
+            "%d", \
+            
+            iEle_myMap->first, getLumi(iEle_myMap->first), \
+            iEle_myMap->second.at(0), \
+            
+            iEle_myMap->second.at(4), \
+            iEle_myMap->second.at(5), \
+            iEle_myMap->second.at(8), \
+            
+            iEle_myMap->second.at(1), \
+            iEle_myMap->second.at(2), \
+            iEle_myMap->second.at(3), \
+            
+            iEle_myMap->second.at(6), \
+            iEle_myMap->second.at(7), \
+            
+            iEle_myMap->second.at(9), \
+            iEle_myMap->second.at(10)
+        );
+        
+        fprintf(textFile, "\n");
+    }
+    
+    fclose(textFile);
 }
 
 
@@ -1212,11 +1315,19 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
             }
         }
         
+        if(m_MB2_LQ.find(input->runNumber) == m_MB2_LQ.end())
+        {
+            m_MB2_LQ[input->runNumber] = std::vector <int>(11, 0);
+            m_MB2_HQ[input->runNumber] = std::vector <int>(11, 0);
+        }
+        
         nEvent_global++;
-        //m_MB1_LQ[input->runNumber].at(0)++;
-        //m_MB1_HQ[input->runNumber].at(0)++;
+        
         updateCounterMap(&m_MB1_LQ, input->runNumber, 0);
         updateCounterMap(&m_MB1_HQ, input->runNumber, 0);
+        
+        m_MB2_LQ[input->runNumber].at(0)++;
+        m_MB2_HQ[input->runNumber].at(0)++;
         
         
         //printf("runNumber %ld, lumiBlock %ld, eventNumber %ld, iEvent %d \n", \
@@ -1225,28 +1336,77 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
         //fprintf(output->eventInfoFile, "%d,%d,%d,%d \n", \
             input->runNumber, input->lumiBlock, input->eventNumber, iEvent);
         
-        // Fill number of HOTP at SOI
+        // Fill/count HOTP
         int nHOTP = input->v_hoTPdigi_bits->size();
         
         for(int iHOTP = 0; iHOTP < nHOTP; iHOTP++)
         {
-            //m_MB1_LQ[input->runNumber].at(3)++;
-            //m_MB1_HQ[input->runNumber].at(3)++;
-            updateCounterMap(&m_MB1_LQ, input->runNumber, 4);
-            updateCounterMap(&m_MB1_HQ, input->runNumber, 4);
+            int whNum_iHOTP = getWheelFromIeta(input->v_hoTPdigi_iEta->at(iHOTP));
+            
+            if(abs(whNum_iHOTP) != 2)
+            {
+                updateCounterMap(&m_MB1_LQ, input->runNumber, 4);
+                updateCounterMap(&m_MB1_HQ, input->runNumber, 4);
+            }
             
             if(input->v_hoTPdigi_bits->at(iHOTP) != HOTP_bits_SOI)
             {
                 continue;
             }
             
-            //m_MB1_LQ[input->runNumber].at(4)++;
-            //m_MB1_HQ[input->runNumber].at(4)++;
-            updateCounterMap(&m_MB1_LQ, input->runNumber, 5);
-            updateCounterMap(&m_MB1_HQ, input->runNumber, 5);
+            if(abs(whNum_iHOTP) != 2)
+            {
+                updateCounterMap(&m_MB1_LQ, input->runNumber, 5);
+                updateCounterMap(&m_MB1_HQ, input->runNumber, 5);
+            }
+            
+            m_MB2_LQ[input->runNumber].at(4)++;
+            m_MB2_HQ[input->runNumber].at(4)++;
             
             output->h2_HOTP_iPhi_vs_wheel->Fill(getWheelFromIeta(input->v_hoTPdigi_iEta->at(iHOTP)), input->v_hoTPdigi_iPhi->at(iHOTP));
         }
+        
+        
+        int nDTTP = input->v_ltTwinMuxIn_bx->size();
+        
+        // Fill/count DTTP
+        for(int iDTTP = 0; iDTTP < nDTTP; iDTTP++)
+        {
+            int stNum_iDTTP = input->v_ltTwinMuxIn_station->at(iDTTP);
+            int whNum_iDTTP = input->v_ltTwinMuxIn_wheel->at(iDTTP);
+            int scNum_iDTTP = input->v_ltTwinMuxIn_sector->at(iDTTP);
+            
+            int quality = input->v_ltTwinMuxIn_quality->at(iDTTP);
+            
+            bool isLQ = quality > 0 && quality < 4;
+            bool isHQ = quality > 3 && quality < 7;
+            
+            // Check DTTP quality
+            if(!isLQ && !isHQ)
+            {
+                continue;
+            }
+            
+            // MB2 wh+-1
+            if(stNum_iDTTP == 2)
+            {
+                m_MB2_LQ[input->runNumber].at(1) += (int) isLQ;
+                m_MB2_HQ[input->runNumber].at(1) += (int) isHQ;
+                
+                if(whNum_iDTTP == 1)
+                {
+                    m_MB2_LQ[input->runNumber].at(2) += (int) isLQ;
+                    m_MB2_HQ[input->runNumber].at(2) += (int) isHQ;
+                }
+                
+                else if(whNum_iDTTP == -1)
+                {
+                    m_MB2_LQ[input->runNumber].at(3) += (int) isLQ;
+                    m_MB2_HQ[input->runNumber].at(3) += (int) isHQ;
+                }
+            }
+        }
+        
         
         // Store best DT reco segment in each wh/st/sc
         int a_bestDTsegment_index[nWheel][nStation][nSector];
@@ -1594,23 +1754,23 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
                         
                         int quality = input->v_ltTwinMuxIn_quality->at(iDTTP);
                         
-                        bool is_LQ = quality > 0 && quality < 4;
-                        bool is_HQ = quality > 3 && quality < 7;
+                        bool isLQ = quality > 0 && quality < 4;
+                        bool isHQ = quality > 3 && quality < 7;
                         
                         // Check DTTP quality
-                        if(!is_LQ && !is_HQ)
+                        if(!isLQ && !isHQ)
                         {
                             continue;
                         }
                         
                         // Select the histograms to write to (LQ or HQ)
-                        if(is_LQ)
+                        if(isLQ)
                         {
                             printf("Matching MB1 DTTP (LQ) found. \n");
                             currentOutput = output_LQ;
                         }
                         
-                        else if(is_HQ)
+                        else if(isHQ)
                         {
                             printf("Matching MB1 DTTP (HQ) found. \n");
                             currentOutput = output_HQ;
@@ -1772,23 +1932,23 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
                 
                 int quality = input->v_ltTwinMuxIn_quality->at(iDTTP);
                 
-                bool is_LQ = quality > 0 && quality < 4;
-                bool is_HQ = quality > 3 && quality < 7;
+                bool isLQ = quality > 0 && quality < 4;
+                bool isHQ = quality > 3 && quality < 7;
                 
                 // Check DTTP quality
-                if(!is_LQ && !is_HQ)
+                if(!isLQ && !isHQ)
                 {
                     continue;
                 }
                 
                 // Select the histograms to write to (LQ or HQ)
-                if(is_LQ)
+                if(isLQ)
                 {
                     //printf("Matching MB1 DTTP (LQ) found. \n");
                     currentOutput = output_LQ;
                 }
                 
-                else if(is_HQ)
+                else if(isHQ)
                 {
                     //printf("Matching MB1 DTTP (HQ) found. \n");
                     currentOutput = output_HQ;
@@ -2055,23 +2215,23 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
             
             int quality = input->v_ltTwinMuxIn_quality->at(iDTTP);
             
-            bool is_LQ = quality > 0 && quality < 4;
-            bool is_HQ = quality > 3 && quality < 7;
+            bool isLQ = quality > 0 && quality < 4;
+            bool isHQ = quality > 3 && quality < 7;
             
             // Check DTTP quality
-            if(!is_LQ && !is_HQ)
+            if(!isLQ && !isHQ)
             {
                 continue;
             }
             
             // Select the histograms to write to (LQ or HQ)
-            if(is_LQ)
+            if(isLQ)
             {
                 quality_str = "LQ";
                 currentOutput = output_LQ;
             }
             
-            else if(is_HQ)
+            else if(isHQ)
             {
                 quality_str = "HQ";
                 currentOutput = output_HQ;
@@ -2114,9 +2274,125 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
         }*/
         
         
-        // get isolated MB1 DTTPs (MB1 DTTPs that are not matched to a DTTP from another station)
-        int nDTTP = input->v_ltTwinMuxIn_bx->size();
         
+        // Get HO_wh0-MB2_wh+-1 crossers
+        for(int iHOTP = 0; iHOTP < nHOTP; iHOTP++)
+        {
+            if(input->v_hoTPdigi_bits->at(iHOTP) != HOTP_bits_SOI)
+            {
+                continue;
+            }
+            
+            int iEta_iHOTP = input->v_hoTPdigi_iEta->at(iHOTP);
+            int whNum_iHOTP = getWheelFromIeta(iEta_iHOTP);
+            
+            // HO wheel0 only
+            //if(whNum_iHOTP != 0)
+            //{
+            //    continue;
+            //}
+            
+            // HO iEta +-4 only
+            if(abs(iEta_iHOTP) != 4)
+            {
+                continue;
+            }
+            
+            if(iEta_iHOTP == 4)
+            {
+                m_MB2_LQ[input->runNumber].at(5)++;
+                m_MB2_HQ[input->runNumber].at(5)++;
+            }
+            
+            else if(iEta_iHOTP == -4)
+            {
+                m_MB2_LQ[input->runNumber].at(8)++;
+                m_MB2_HQ[input->runNumber].at(8)++;
+            }
+            
+            int deltaIphi_nearest = 100;
+            
+            bool isLQ_nearest = false;
+            bool isHQ_nearest = false;
+            bool isSameHemisphere = false;
+            
+            for(int iDTTP = 0; iDTTP < nDTTP; iDTTP++)
+            {
+                int stNum_iDTTP = input->v_ltTwinMuxIn_station->at(iDTTP);
+                int whNum_iDTTP = input->v_ltTwinMuxIn_wheel->at(iDTTP);
+                int scNum_iDTTP = input->v_ltTwinMuxIn_sector->at(iDTTP);
+                
+                // MB2 only
+                if(stNum_iDTTP != 2)
+                {
+                    continue;
+                }
+                
+                int quality = input->v_ltTwinMuxIn_quality->at(iDTTP);
+                
+                bool isLQ = quality > 0 && quality < 4;
+                bool isHQ = quality > 3 && quality < 7;
+                
+                // Check DTTP quality
+                if(!isLQ && !isHQ)
+                {
+                    continue;
+                }
+                
+                // MB2 wheel+-1 only
+                if(abs(whNum_iDTTP) != 1)
+                {
+                    continue;
+                }
+                
+                int deltaIphi =  input->v_ltTwinMuxIn_iPhi->at(iDTTP) - input->v_hoTPdigi_iPhi->at(iHOTP);
+                deltaIphi = (deltaIphi > 36)? (deltaIphi-72): deltaIphi;
+                deltaIphi = (deltaIphi < -36)? (deltaIphi+72): deltaIphi;
+                
+                if(abs(deltaIphi) < abs(deltaIphi_nearest))
+                {
+                    deltaIphi_nearest = deltaIphi;
+                    
+                    isLQ_nearest = isLQ;
+                    isHQ_nearest = isHQ;
+                    
+                    // HOTP and MB2TP must be in the same hemisphere
+                    if(iEta_iHOTP*whNum_iDTTP > 0)
+                    {
+                        isSameHemisphere = true;
+                    }
+                    
+                    else
+                    {
+                        isSameHemisphere = false;
+                    }
+                }
+            }
+            
+            if(abs(deltaIphi_nearest) <= MB2_HO_deltaIphiCut)
+            {
+                if(iEta_iHOTP == 4)
+                {
+                    m_MB2_LQ[input->runNumber].at(6) += (int) (isLQ_nearest && isSameHemisphere);
+                    m_MB2_HQ[input->runNumber].at(6) += (int) (isHQ_nearest && isSameHemisphere);
+                    
+                    m_MB2_LQ[input->runNumber].at(7) += (int) (isLQ_nearest && !isSameHemisphere);
+                    m_MB2_HQ[input->runNumber].at(7) += (int) (isHQ_nearest && !isSameHemisphere);
+                }
+                
+                else if(iEta_iHOTP == -4)
+                {
+                    m_MB2_LQ[input->runNumber].at(9) += (int) (isLQ_nearest && isSameHemisphere);
+                    m_MB2_HQ[input->runNumber].at(9) += (int) (isHQ_nearest && isSameHemisphere);
+                    
+                    m_MB2_LQ[input->runNumber].at(10) += (int) (isLQ_nearest && !isSameHemisphere);
+                    m_MB2_HQ[input->runNumber].at(10) += (int) (isHQ_nearest && !isSameHemisphere);
+                }
+            }
+        }
+        
+        
+        // get isolated MB1 DTTPs (MB1 DTTPs that are not matched to a DTTP from another station)
         for(int iDTTP = 0; iDTTP < nDTTP; iDTTP++)
         {
             int stNum_iDTTP = input->v_ltTwinMuxIn_station->at(iDTTP)-1;
@@ -2141,6 +2417,11 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
             
             double pT_iDTTP = getPtFromPhiB((int) input->v_ltTwinMuxIn_phiB->at(iDTTP));
             
+            //if(pT_iDTTP < MB1_pTcut)
+            //{
+            //    continue;
+            //}
+            
             if(whNum_iDTTP == 2)
             //if(whNum_iDTTP == 2 && scNum_iDTTP == 0)
             {
@@ -2160,34 +2441,32 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
             
             int quality = input->v_ltTwinMuxIn_quality->at(iDTTP);
             
-            bool is_LQ = quality > 0 && quality < 4;
-            bool is_HQ = quality > 3 && quality < 7;
+            bool isLQ = quality > 0 && quality < 4;
+            bool isHQ = quality > 3 && quality < 7;
             
             // Check DTTP quality
-            if(!is_LQ && !is_HQ)
+            if(!isLQ && !isHQ)
             {
                 continue;
             }
             
             // Select the histograms to write to (LQ or HQ)
-            if(is_LQ)
+            if(isLQ)
             {
                 quality_str = "LQ";
                 currentOutput = output_LQ;
                 MB1_n_LQ++;
                 
-                //m_MB1_LQ[input->runNumber].at(1)++;
-                updateCounterMap(&m_MB1_LQ, input->runNumber, 1, input->v_ltTwinMuxIn_phiB->at(iDTTP));
+                updateCounterMap(&m_MB1_LQ, input->runNumber, 1, pT_iDTTP);
             }
             
-            else if(is_HQ)
+            else if(isHQ)
             {
                 quality_str = "HQ";
                 currentOutput = output_HQ;
                 MB1_n_HQ++;
                 
-                //m_MB1_HQ[input->runNumber].at(1)++;
-                updateCounterMap(&m_MB1_HQ, input->runNumber, 1);
+                updateCounterMap(&m_MB1_HQ, input->runNumber, 1, pT_iDTTP);
             }
             
             currentOutput->h1_MB1DTTP_pT->Fill(pT_iDTTP);
@@ -2256,11 +2535,10 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
                 
                 double globalPhi_jDTTP = globalPhiFromDTphi(input->v_ltTwinMuxIn_phi->at(jDTTP), input->v_ltTwinMuxIn_sector->at(jDTTP));
                 double deltaPhi = globalPhi_iDTTP - globalPhi_jDTTP;
-                
+                deltaPhi = (deltaPhi > M_PI)? (deltaPhi-2*M_PI): deltaPhi;
+                deltaPhi = (deltaPhi < -M_PI)? (deltaPhi+2*M_PI): deltaPhi;
                 int deltaPhiSign = (deltaPhi < 0)? -1: 1;
-                
                 deltaPhi = fabs(deltaPhi);
-                deltaPhi = (deltaPhi > M_PI)? (2*M_PI - deltaPhi): deltaPhi;
                 
                 
                 //printf("deltaPhi %f \n", deltaPhi);
@@ -2329,15 +2607,17 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
             }
             
             currentOutput->h1_MB1DTTP_deltaPhi->Fill(deltaPhi_nearest*deltaPhiSign_nearest);
+            currentOutput->h2_MB1DTTP_pT_vs_deltaPhi->Fill(deltaPhi_nearest*deltaPhiSign_nearest, pT_iDTTP);
+            currentOutput->h2_MB1DTTP_pT_vs_phiB->Fill(input->v_ltTwinMuxIn_phiB->at(iDTTP), pT_iDTTP);
             
             if(isIsolated_inTimeMatching)
             {
-                if(is_LQ)
+                if(isLQ)
                 {
                     isolatedMB1_n_LQ_inTimeMatching++;
                 }
                 
-                else if(is_HQ)
+                else if(isHQ)
                 {
                     isolatedMB1_n_HQ_inTimeMatching++;
                 }
@@ -2345,12 +2625,12 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
             
             if(isIsolated_deltaTimeMatching)
             {
-                if(is_LQ)
+                if(isLQ)
                 {
                     isolatedMB1_n_LQ_deltaTimeMatching++;
                 }
                 
-                else if(is_HQ)
+                else if(isHQ)
                 {
                     isolatedMB1_n_HQ_deltaTimeMatching++;
                 }
@@ -2411,7 +2691,9 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
                     continue;
                 }
                 
-                int deltaIphi =  input->v_ltTwinMuxIn_iPhi->at(iDTTP) - input->v_hoTPdigi_iPhi->at(iHOTP);
+                int deltaIphi = input->v_ltTwinMuxIn_iPhi->at(iDTTP) - input->v_hoTPdigi_iPhi->at(iHOTP);
+                deltaIphi = (deltaIphi > 36)? (deltaIphi-72): deltaIphi;
+                deltaIphi = (deltaIphi < -36)? (deltaIphi+72): deltaIphi;
                 int deltaIphiSign = (deltaIphi < 0)? -1: 1;
                 deltaIphi = abs(deltaIphi);
                 
@@ -2420,13 +2702,15 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
                 deltaWheel = abs(deltaWheel);
                 
                 int deltaSector = input->v_ltTwinMuxIn_sector->at(iDTTP) - getSectorFromIphi(input->v_hoTPdigi_iPhi->at(iHOTP));
+                deltaSector = (deltaSector > 6)? (deltaSector-12): deltaSector;
+                deltaSector = (deltaSector < -6)? (deltaSector+12): deltaSector;
                 int deltaSectorSign = (deltaSector < 0)? -1: 1;
                 deltaSector = abs(deltaSector);
                 
-                //if(deltaSector > 1)
-                //{
-                //    continue;
-                //}
+                if(deltaSector > MB1_HO_deltaSectorCut)
+                {
+                    continue;
+                }
                 
                 // Get the min deltaIeta between the the current HOTP and the MB1TP
                 int thDTTP_index_min = -1;
@@ -2539,34 +2823,44 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
                 iDTTP_etaGlobal = (thWhNum+2)*7 + thEtaLocal;
             }
             
+            // Wraparound MB1 phiLocal
+            int iDTTP_phiLocal_wrapped = input->v_ltTwinMuxIn_phi->at(iDTTP);
+            
+            if(deltaSector_nearest && deltaSectorSign_nearest < 0)
+            {
+                iDTTP_phiLocal_wrapped -= MB1_phiLocal_wrapAround;
+            }
+            
+            else if(deltaSector_nearest && deltaSectorSign_nearest > 0)
+            {
+                iDTTP_phiLocal_wrapped += MB1_phiLocal_wrapAround;
+            }
+            
+            
             if(isIsolated)
             {
                 currentOutput->h1_isolatedMB1DTTP_pT->Fill(pT_iDTTP);
                 
-                if(is_LQ)
+                if(isLQ)
                 {
                     isolatedMB1_n_LQ_noTimeMatching++;
-                    //m_MB1_LQ[input->runNumber].at(2)++;
                     updateCounterMap(&m_MB1_LQ, input->runNumber, 2, pT_iDTTP);
                     
                     if(isHOTPmatched)
                     {
-                        //m_MB1_LQ[input->runNumber].at(5)++;
                         updateCounterMap(&m_MB1_LQ, input->runNumber, 6, pT_iDTTP);
                         
                         currentOutput->h1_isolatedMB1DTTP_HOTP_pT->Fill(pT_iDTTP);
                     }
                 }
                 
-                else if(is_HQ)
+                else if(isHQ)
                 {
                     isolatedMB1_n_HQ_noTimeMatching++;
-                    //m_MB1_HQ[input->runNumber].at(2)++;
                     updateCounterMap(&m_MB1_HQ, input->runNumber, 2, pT_iDTTP);
                     
                     if(isHOTPmatched)
                     {
-                        //m_MB1_HQ[input->runNumber].at(5)++;
                         updateCounterMap(&m_MB1_HQ, input->runNumber, 6, pT_iDTTP);
                         
                         currentOutput->h1_isolatedMB1DTTP_HOTP_pT->Fill(pT_iDTTP);
@@ -2582,6 +2876,7 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
                     {
                         currentOutput->h1_isolatedMB1DTTP_HOTP_deltaIphi->Fill(deltaIphi_nearest*deltaIphiSign_nearest);
                         currentOutput->h1_isolatedMB1DTTP_HOTP_deltaWheel->Fill(deltaWheel_nearest*deltaWheelSign_nearest);
+                        currentOutput->h2_isolatedMB1DTTP_HOTP_pT_vs_deltaIphi->Fill(deltaIphi_nearest*deltaIphiSign_nearest, pT_iDTTP);
                         currentOutput->h2_isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel->Fill(deltaWheel_nearest*deltaWheelSign_nearest, deltaIphi_nearest*deltaIphiSign_nearest);
                         currentOutput->h2_isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaIeta->Fill(deltaIeta_nearest*deltaIetaSign_nearest, deltaIphi_nearest*deltaIphiSign_nearest);
                         currentOutput->h2_isolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel->Fill(deltaWheel_nearest*deltaWheelSign_nearest, deltaSector_nearest*deltaSectorSign_nearest);
@@ -2589,7 +2884,7 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
                         currentOutput->h2_isolatedMB1DTTP_vs_HOTP_iPhi->Fill(input->v_hoTPdigi_iPhi->at(HOTP_index_nearest), input->v_ltTwinMuxIn_iPhi->at(iDTTP));
                         
                         int HOTP_phiLocal = (input->v_hoTPdigi_iPhi->at(HOTP_index_nearest) - 1 + 2) % 6;
-                        currentOutput->h2_isolatedMB1DTTP_vs_HOTP_phiLocal->Fill(HOTP_phiLocal, input->v_ltTwinMuxIn_phi->at(iDTTP));
+                        currentOutput->h2_isolatedMB1DTTP_vs_HOTP_phiLocal->Fill(HOTP_phiLocal, iDTTP_phiLocal_wrapped);
                         
                         if(thDTTP_index_nearest >= 0)
                         {
@@ -2615,7 +2910,7 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
             {
                 currentOutput->h1_unisolatedMB1DTTP_pT->Fill(pT_iDTTP);
                 
-                if(is_LQ)
+                if(isLQ)
                 {
                     updateCounterMap(&m_MB1_LQ, input->runNumber, 3, pT_iDTTP);
                     
@@ -2627,7 +2922,7 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
                     }
                 }
                 
-                else if(is_HQ)
+                else if(isHQ)
                 {
                     updateCounterMap(&m_MB1_HQ, input->runNumber, 3, pT_iDTTP);
                     
@@ -2647,6 +2942,7 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
                 
                 if(HOTP_index_nearest >= 0)
                 {
+                    currentOutput->h2_unisolatedMB1DTTP_HOTP_pT_vs_deltaIphi->Fill(deltaIphi_nearest*deltaIphiSign_nearest, pT_iDTTP);
                     currentOutput->h2_unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel->Fill(deltaWheel_nearest*deltaWheelSign_nearest, deltaIphi_nearest*deltaIphiSign_nearest);
                     currentOutput->h2_unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaIeta->Fill(deltaIeta_nearest*deltaIetaSign_nearest, deltaIphi_nearest*deltaIphiSign_nearest);
                     currentOutput->h2_unisolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel->Fill(deltaWheel_nearest*deltaWheelSign_nearest, deltaSector_nearest*deltaSectorSign_nearest);
@@ -2654,7 +2950,7 @@ void analyze(InputData *input, OutputData *output, OutputData *output_LQ, Output
                     currentOutput->h2_unisolatedMB1DTTP_vs_HOTP_iPhi->Fill(input->v_hoTPdigi_iPhi->at(HOTP_index_nearest), input->v_ltTwinMuxIn_iPhi->at(iDTTP));
                     
                     int HOTP_phiLocal = (input->v_hoTPdigi_iPhi->at(HOTP_index_nearest) - 1 + 2) % 6;
-                    currentOutput->h2_unisolatedMB1DTTP_vs_HOTP_phiLocal->Fill(HOTP_phiLocal, input->v_ltTwinMuxIn_phi->at(iDTTP));
+                    currentOutput->h2_unisolatedMB1DTTP_vs_HOTP_phiLocal->Fill(HOTP_phiLocal, iDTTP_phiLocal_wrapped);
                     
                     if(thDTTP_index_nearest >= 0)
                     {

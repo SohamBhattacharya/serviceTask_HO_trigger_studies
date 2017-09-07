@@ -809,7 +809,7 @@ void TTreeGenerator::fill_twinmuxth_variables(edm::Handle<L1MuDTChambThContainer
         
         for(int i = 0; i < 7; i++)
         {
-            if(!ith->position(i)/* || !ith->quality(i)*/)
+            if(!ith->position(i) || !ith->quality(i))
             {
                 continue;
             }

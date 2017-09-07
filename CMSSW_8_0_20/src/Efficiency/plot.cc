@@ -74,7 +74,13 @@ void plot_MB_HO(TFile *inputFile)
     };
     
     std::vector <std::string> v_h2Name = {
+        "MB1DTTP_pT_vs_deltaPhi",
+        "MB1DTTP_pT_vs_phiB",
+        
+        "unisolatedMB1DTTP_pT_vs_deltaPhi",
+        "unisolatedMB1DTTP_pT_vs_phiB",
         "unisolatedMB1DTTP_deltaBX_vs_deltaPhi",
+        "unisolatedMB1DTTP_HOTP_pT_vs_deltaIphi",
         "unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel",
         "unisolatedMB1DTTP_HOTP_deltaIphi_vs_deltaIeta",
         "unisolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel",
@@ -85,6 +91,7 @@ void plot_MB_HO(TFile *inputFile)
         "unisolatedMB1DTTP_vs_HOTP_iPhi",
         "unisolatedMB1DTTP_vs_HOTP_phiLocal",
         
+        "isolatedMB1DTTP_pT_vs_phiB",
         "isolatedMB1DTTP_vs_HOTP_iEta",
         "isolatedMB1DTTP_vs_HOTP_etaGlobal",
         "isolatedPlusMB1DTTP_vs_HOTP_etaLocal",
@@ -92,6 +99,7 @@ void plot_MB_HO(TFile *inputFile)
         "isolatedMB1DTTP_vs_HOTP_iPhi",
         "isolatedMB1DTTP_vs_HOTP_phiLocal",
         "isolatedMB1DTTP_iPhi_vs_wheel",
+        "isolatedMB1DTTP_HOTP_pT_vs_deltaIphi",
         "isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaWheel",
         "isolatedMB1DTTP_HOTP_deltaIphi_vs_deltaIeta",
         "isolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel",
@@ -122,6 +130,7 @@ void plot_MB_HO(TFile *inputFile)
         v_histLabel.clear();
     }
     
+    // Phi LUT
     for(int iHist = 0; iHist < v_h2Name.size(); iHist++)
     {
         if(!(v_h2Name.at(iHist).compare("unisolatedMB1DTTP_vs_HOTP_phiLocal") == 0 \
@@ -168,7 +177,7 @@ void plot_MB_HO(TFile *inputFile)
                 
                 plot(&v_hist, \
                     &v_histLabel, \
-                    -700, 1500, \
+                    -3000, 3000, \
                     0, 0, \
                     title_mod.c_str(), \
                     outFileName);
@@ -179,6 +188,7 @@ void plot_MB_HO(TFile *inputFile)
         }
     }
     
+    // Eta LUT
     for(int iHist = 0; iHist < v_h2Name.size(); iHist++)
     {
         // {iEta_start, iEta_end, wheel}
@@ -378,9 +388,13 @@ void plot_MB_HO(TFile *inputFile)
             hist->SetMarkerSize(0.75);
             
             //hist->Draw("colz text");
-            if(v_h2Name.at(iHist).compare("isolatedPlusMB1DTTP_vs_HOTP_etaLocal") >= 0 
-                || v_h2Name.at(iHist).compare("isolatedMinusMB1DTTP_vs_HOTP_etaLocal") >= 0
-                || v_h2Name.at(iHist).compare("isolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel") >= 0)
+            if(v_h2Name.at(iHist).compare("isolatedPlusMB1DTTP_vs_HOTP_etaLocal") == 0
+                || v_h2Name.at(iHist).compare("unisolatedPlusMB1DTTP_vs_HOTP_etaLocal") == 0
+                || v_h2Name.at(iHist).compare("isolatedMinusMB1DTTP_vs_HOTP_etaLocal") == 0
+                || v_h2Name.at(iHist).compare("unisolatedMinusMB1DTTP_vs_HOTP_etaLocal") == 0
+                || v_h2Name.at(iHist).compare("isolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel") == 0
+                || v_h2Name.at(iHist).compare("unisolatedMB1DTTP_HOTP_deltaSector_vs_deltaWheel") == 0
+            )
             {
                 hist->Draw("colz text89");
             }
@@ -394,10 +408,15 @@ void plot_MB_HO(TFile *inputFile)
             TGaxis::SetMaxDigits(4);
             
             //canvas->SetLogy();
-            //if(iHist == 2)
-            //{
-            //    canvas->SetLogz();
-            //}
+        
+            if(v_h2Name.at(iHist).compare("MB1DTTP_pT_vs_deltaPhi") == 0
+                || v_h2Name.at(iHist).compare("unisolatedMB1DTTP_pT_vs_deltaPhi") == 0
+                || v_h2Name.at(iHist).compare("unisolatedMB1DTTP_HOTP_pT_vs_deltaIphi") == 0
+                || v_h2Name.at(iHist).compare("isolatedMB1DTTP_HOTP_pT_vs_deltaIphi") == 0
+            )
+            {
+                canvas->SetLogz();
+            }
             
             canvas->SetGridx();
             canvas->SetGridy();
