@@ -158,9 +158,9 @@ void plot_MB_HO(TFile *inputFile)
                 TH2F *hist = (TH2F*) inputFile->Get(histName)->Clone();
                 hist->SetDirectory(0);
                 
-                for(int iBinX = 1; iBinX < hist->GetNbinsX(); iBinX++)
+                for(int iBinX = 1; iBinX <= hist->GetNbinsX(); iBinX++)
                 {
-                    for(int iBinY = 1; iBinY < hist->GetNbinsY(); iBinY++)
+                    for(int iBinY = 1; iBinY <= hist->GetNbinsY(); iBinY++)
                     {
                         if(iBinX != iPhi+1)
                         {
@@ -261,9 +261,9 @@ void plot_MB_HO(TFile *inputFile)
                     TH2F *hist = (TH2F*) inputFile->Get(histName)->Clone();
                     hist->SetDirectory(0);
                     
-                    for(int iBinX = 1; iBinX < hist->GetNbinsX(); iBinX++)
+                    for(int iBinX = 1; iBinX <= hist->GetNbinsX(); iBinX++)
                     {
-                        for(int iBinY = 1; iBinY < hist->GetNbinsY(); iBinY++)
+                        for(int iBinY = 1; iBinY <= hist->GetNbinsY(); iBinY++)
                         {
                             if((int) hist->GetXaxis()->GetBinLowEdge(iBinX) != iEta)
                             {
@@ -316,7 +316,7 @@ void plot_MB_HO(TFile *inputFile)
                 
                 TH1F *histProjX = (TH1F*) histProjX->ProjectionX()->Clone();
                 
-                for(int iBinX = 1; iBinX < hist->GetNbinsX(); iBinX++)
+                for(int iBinX = 1; iBinX <= hist->GetNbinsX(); iBinX++)
                 {
                     if(iBinX != iPhi+1)
                     {
@@ -335,9 +335,9 @@ void plot_MB_HO(TFile *inputFile)
                 TH2F *hist = (TH2F*) inputFile->Get(histName)->Clone();
                 hist->SetDirectory(0);
                 
-                for(int iBinX = 1; iBinX < hist->GetNbinsX(); iBinX++)
+                for(int iBinX = 1; iBinX <= hist->GetNbinsX(); iBinX++)
                 {
-                    for(int iBinY = 1; iBinY < hist->GetNbinsY(); iBinY++)
+                    for(int iBinY = 1; iBinY <= hist->GetNbinsY(); iBinY++)
                     {
                         if(iBinX != iPhi+1)
                         {

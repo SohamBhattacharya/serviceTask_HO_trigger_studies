@@ -70,6 +70,8 @@ for iPt in range(0, len(pTcuts)) :
     
     rate_avg = numpy.average(fileContent[iPt][:, 11], weights = fileContent[iPt][:, 1])
     rates_isoMB1_HO.append(rate_avg)
+    print rates_isoMB1_HO
+    print numpy.average(fileContent[iPt][:, 11])
     
     #
     rate_avg = numpy.average(fileContent[iPt][:, 13], weights = fileContent[iPt][:, 1])
@@ -87,19 +89,24 @@ for iPt in range(0, len(pTcuts)) :
 MB1_labelSuffix = "\_HQ"
 
 matplotlib.pyplot.semilogy(pTcuts, rates_HO_SOI, "g.-", label = "HO", markersize = 10, linewidth = 2)
-matplotlib.pyplot.semilogy(pTcuts, rates_MB1, "k.-", label = "MB1"+MB1_labelSuffix, markersize = 10, linewidth = 2)
+#matplotlib.pyplot.semilogy(pTcuts, rates_MB1, "k.-", label = "MB1"+MB1_labelSuffix, markersize = 10, linewidth = 2)
+matplotlib.pyplot.semilogy(pTcuts, rates_MB1, "k.-", label = "MB1"+MB1_labelSuffix+"(wh0)", markersize = 10, linewidth = 2)
 
-matplotlib.pyplot.semilogy(pTcuts, rates_isoMB1, "r.-", label = "isoMB1"+MB1_labelSuffix, markersize = 10, linewidth = 2)
-matplotlib.pyplot.semilogy(pTcuts, rates_isoMB1_HO, "r.--", label = "isoMB1"+MB1_labelSuffix+"+HO", markersize = 10, linewidth = 2)
-ratio = numpy.divide(rates_isoMB1_HO, rates_isoMB1)
-matplotlib.pyplot.semilogy(pTcuts, 100*ratio, "r.:", label = "ratio x 100 [mean = " + ("%0.3f"%numpy.average(ratio)) + "]", markersize = 10, linewidth = 2)
-print ratio, numpy.average(ratio)
+#matplotlib.pyplot.semilogy(pTcuts, rates_isoMB1, "r.-", label = "isoMB1"+MB1_labelSuffix, markersize = 10, linewidth = 2)
+matplotlib.pyplot.semilogy(pTcuts, rates_isoMB1, "r.-", label = "isoMB1"+MB1_labelSuffix+"(wh0)", markersize = 10, linewidth = 2)
+#matplotlib.pyplot.semilogy(pTcuts, rates_isoMB1_HO, "r.--", label = "isoMB1"+MB1_labelSuffix+"+HO", markersize = 10, linewidth = 2)
+matplotlib.pyplot.semilogy(pTcuts, rates_isoMB1_HO, "r.--", label = r"isoMB1"+MB1_labelSuffix+"(wh0)+HO($ i\\eta\\pm4 $)", markersize = 10, linewidth = 2)
+#ratio = numpy.divide(rates_isoMB1_HO, rates_isoMB1)
+#matplotlib.pyplot.semilogy(pTcuts, 100*ratio, "r.:", label = "ratio x 100 [mean = " + ("%0.3f"%numpy.average(ratio)) + "]", markersize = 10, linewidth = 2)
+#print ratio, numpy.average(ratio)
 
-matplotlib.pyplot.semilogy(pTcuts, rates_unisoMB1, "b.-", label = "unisoMB1"+MB1_labelSuffix, markersize = 10, linewidth = 2)
-matplotlib.pyplot.semilogy(pTcuts, rates_unisoMB1_HO, "b.--", label = "unisoMB1"+MB1_labelSuffix+"+HO", markersize = 10, linewidth = 2)
-ratio = numpy.divide(rates_unisoMB1_HO, rates_unisoMB1)
-matplotlib.pyplot.semilogy(pTcuts, 100*ratio, "b.:", label = "ratio x 100 [mean = " + ("%0.3f"%numpy.average(ratio)) + "]", markersize = 10, linewidth = 2)
-print ratio, numpy.average(ratio)
+#matplotlib.pyplot.semilogy(pTcuts, rates_unisoMB1, "b.-", label = "unisoMB1"+MB1_labelSuffix, markersize = 10, linewidth = 2)
+matplotlib.pyplot.semilogy(pTcuts, rates_unisoMB1, "b.-", label = "unisoMB1"+MB1_labelSuffix+"(wh0)", markersize = 10, linewidth = 2)
+#matplotlib.pyplot.semilogy(pTcuts, rates_unisoMB1_HO, "b.--", label = "unisoMB1"+MB1_labelSuffix+"+HO", markersize = 10, linewidth = 2)
+matplotlib.pyplot.semilogy(pTcuts, rates_unisoMB1_HO, "b.--", label = "unisoMB1"+MB1_labelSuffix+"(wh0)+HO($ i\\eta\\pm4 $)", markersize = 10, linewidth = 2)
+#ratio = numpy.divide(rates_unisoMB1_HO, rates_unisoMB1)
+#matplotlib.pyplot.semilogy(pTcuts, 100*ratio, "b.:", label = "ratio x 100 [mean = " + ("%0.3f"%numpy.average(ratio)) + "]", markersize = 10, linewidth = 2)
+#print ratio, numpy.average(ratio)
 
 matplotlib.pyplot.legend(
     loc = 1,
