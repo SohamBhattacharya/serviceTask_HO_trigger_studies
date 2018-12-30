@@ -279,11 +279,11 @@ void TTreeGenerator::analyze(const edm::Event& event, const edm::EventSetup& con
 
     context.get<GlobalTrackingGeometryRecord>().get(theTrackingGeometry);
 
-    /*edm::Handle<reco::VertexCollection> privtxs;
+    edm::Handle<reco::VertexCollection> privtxs;
     if(!localDTmuons_) event.getByToken(PrimaryVertexToken_, privtxs);
     
-    edm::Handle<CSCSegmentCollection> cscsegments;
-    event.getByToken(cscSegmentToken_, cscsegments);*/
+    //edm::Handle<CSCSegmentCollection> cscsegments;
+    //event.getByToken(cscSegmentToken_, cscsegments);
 
     edm::Handle<L1MuDTChambPhContainer> localTriggerTwinMuxOut;
     bool hasPhiTwinMuxOut=false;
@@ -297,20 +297,20 @@ void TTreeGenerator::analyze(const edm::Event& event, const edm::EventSetup& con
     bool hasThetaTwinMux=false;
     if(runOnRaw_) hasThetaTwinMux=event.getByToken(dtTrigTwinMux_ThToken_,localTriggerTwinMux_Th);
 
-    /*edm::Handle<reco::MuonCollection> MuList;
+    edm::Handle<reco::MuonCollection> MuList;
     if(!localDTmuons_) event.getByToken(staMuToken_,MuList);
 
-    edm::Handle<l1t::MuonBxCollection> gmt;    // legacy
-    if(!localDTmuons_) event.getByToken(gmtToken_,gmt); // legacy
+    //edm::Handle<l1t::MuonBxCollection> gmt;    // legacy
+    //if(!localDTmuons_) event.getByToken(gmtToken_,gmt); // legacy
 
-    edm::Handle< L1GlobalTriggerReadoutRecord > gtrc; // legacy
-    if(runOnRaw_ && !localDTmuons_) event.getByToken(gtToken_, gtrc); // legacy
+   //edm::Handle< L1GlobalTriggerReadoutRecord > gtrc; // legacy
+   //if(runOnRaw_ && !localDTmuons_) event.getByToken(gtToken_, gtrc); // legacy
+   //
+   //edm::ESHandle<L1GtTriggerMenu> menuRcd;
+   //context.get<L1GtTriggerMenuRcd>().get(menuRcd) ;
+   //const L1GtTriggerMenu* menu = menuRcd.product();
 
-    edm::ESHandle<L1GtTriggerMenu> menuRcd;
-    context.get<L1GtTriggerMenuRcd>().get(menuRcd) ;
-    const L1GtTriggerMenu* menu = menuRcd.product();
-
-    edm::Handle<edm::TriggerResults>    hltresults;
+    /*edm::Handle<edm::TriggerResults>    hltresults;
     if(!localDTmuons_) event.getByToken(triggerToken_, hltresults); 
 
     edm::Handle<RPCRecHitCollection> rpcHits;
@@ -399,25 +399,25 @@ void TTreeGenerator::analyze(const edm::Event& event, const edm::EventSetup& con
     if(runOnRaw_ && hasThetaTwinMux) fill_twinmuxth_variables(localTriggerTwinMux_Th);
 
     //MUONS
-    /*if(!localDTmuons_) fill_muons_variables(MuList, privtxs);
-
-    //GMT
-    if(!localDTmuons_) fill_gmt_variables(gmt); // legacy
-
-    //GT
-    if(runOnRaw_ && !localDTmuons_) fill_gt_variables(gtrc,menu); // legacy
-       
-    //HLT
-    if(!localDTmuons_) fill_hlt_variables(event,hltresults);
-
-    // RPC
-    if(!localDTmuons_) fill_rpc_variables(event,rpcHits);
+    if(!localDTmuons_) fill_muons_variables(MuList, privtxs);
     
+    //GMT
+    //if(!localDTmuons_) fill_gmt_variables(gmt); // legacy
+    
+    ////GT
+    //if(runOnRaw_ && !localDTmuons_) fill_gt_variables(gtrc,menu); // legacy
+    //   
+    ////HLT
+    //if(!localDTmuons_) fill_hlt_variables(event,hltresults);
+    //
+    //// RPC
+    //if(!localDTmuons_) fill_rpc_variables(event,rpcHits);
+    //
     analyzeBMTF(event);
-
-    analyzeRPCunpacking(event);
-
-    analyzeUnpackingRpcRecHit(event);*/
+    //
+    //analyzeRPCunpacking(event);
+    //
+    //analyzeUnpackingRpcRecHit(event);
     
     tree_->Fill();
 
@@ -809,7 +809,7 @@ void TTreeGenerator::fill_twinmuxth_variables(edm::Handle<L1MuDTChambThContainer
         
         for(int i = 0; i < 7; i++)
         {
-            if(!ith->position(i) || !ith->quality(i))
+            if(!ith->position(i))// || !ith->quality(i))
             {
                 continue;
             }

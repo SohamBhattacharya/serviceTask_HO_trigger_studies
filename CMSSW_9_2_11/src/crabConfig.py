@@ -5,8 +5,8 @@ config = config()
 
 
 inputDataset = "@1@"
-jobName = inputDataset[inputDataset.find("/", 0)+1: inputDataset.find("/", 1)]
 cmsRunFileName = "UserCode/DTDPGAnalysis/test/RunTree_collisions_cfg.py"
+jobName = "@3@" #inputDataset[inputDataset.find("/", 0)+1: inputDataset.find("/", 1)]
 
 
 # Will create crab directory <workArea>/crab_<requestName>
@@ -19,7 +19,10 @@ config.General.transferLogs = True
 config.JobType.pluginName = "Analysis"
 
 
-# python file that for cmsRun
+config.JobType.maxMemoryMB = 3000
+
+
+# python file for cmsRun
 config.JobType.psetName = cmsRunFileName
 
 
@@ -27,7 +30,7 @@ config.JobType.psetName = cmsRunFileName
 
 
 # Other input files/directories (for example, the directory containing JEC .txt files)
-#config.JobType.inputFiles = ["LS.csv"]
+config.JobType.inputFiles = ["luminosityLists"]
 
 
 config.Data.inputDataset = inputDataset
@@ -35,9 +38,15 @@ config.Data.inputDBS = "global"
 
 
 # Preferable for DATA
-config.Data.splitting = "LumiBased"
-config.Data.unitsPerJob = 10
+#config.Data.splitting = "LumiBased"
+#config.Data.unitsPerJob = 1
+
+config.Data.splitting = "EventAwareLumiBased"
+config.Data.unitsPerJob = 1000
+#config.Data.totalUnits = 10000000
+
 #config.Data.lumiMask = "luminosityLists/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt"
+config.Data.lumiMask = "luminosityLists/Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON.txt"
 
 
 

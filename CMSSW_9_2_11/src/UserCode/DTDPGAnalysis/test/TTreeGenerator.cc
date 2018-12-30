@@ -105,7 +105,9 @@ using namespace reco;
 
 TTreeGenerator::TTreeGenerator(const edm::ParameterSet& pset):
           rpcToken_(consumes<MuonDigiCollection<RPCDetId,RPCDigi> > (pset.getParameter<edm::InputTag>("rpcLabel"))),
-          UnpackingRpcRecHitToken_(consumes<RPCRecHitCollection> (pset.getParameter<edm::InputTag>("UnpackingRpcRecHitLabel")))
+          UnpackingRpcRecHitToken_(consumes<RPCRecHitCollection> (pset.getParameter<edm::InputTag>("UnpackingRpcRecHitLabel"))),
+          muPropagator1st_(pset.getParameter<edm::ParameterSet>("muProp1st")),
+          muPropagator2nd_(pset.getParameter<edm::ParameterSet>("muProp2nd"))
 {
     usesResource("TFileService");
     
@@ -229,14 +231,17 @@ void TTreeGenerator::beginLuminosityBlock(edm::LuminosityBlock const& lumiBlock,
     return;
 }
 
-
+int nEvent = 0;
 
 void TTreeGenerator::analyze(const edm::Event& event, const edm::EventSetup& context)
 {
-
+    nEvent++;
+    //printf("Start %d \n", nEvent);
+    
     theSync->setES(context);
 
-
+    muPropagator1st_.init(context);
+    muPropagator2nd_.init(context);
 
     edm::ESHandle<DTGeometry> dtGeomH;
     context.get<MuonGeometryRecord>().get(dtGeomH);
@@ -413,6 +418,7 @@ void TTreeGenerator::analyze(const edm::Event& event, const edm::EventSetup& con
     // RPC
     if(!localDTmuons_) fill_rpc_variables(event,rpcHits);
     
+    //printf("analyzeBMTF %d \n", nEvent);
     analyzeBMTF(event);
 
     analyzeRPCunpacking(event);
@@ -945,41 +951,76 @@ void TTreeGenerator::fill_muons_variables(edm::Handle<reco::MuonCollection> MuLi
 {
     imuons = 0;
     for (reco::MuonCollection::const_iterator nmuon = MuList->begin(); nmuon != MuList->end(); ++nmuon){
-       if(!(nmuon->isStandAloneMuon())) continue;
-       if(imuons >= STAMuSize_) break;
-       const reco::TrackRef mutrackref = nmuon->outerTrack();
-       STAMu_isMuGlobal.push_back(nmuon->isGlobalMuon());
-       STAMu_isMuTracker.push_back(nmuon->isTrackerMuon());
-       STAMu_isMuTight.push_back(muon::isTightMuon(*nmuon, (*privtxs)[0]));
-       //printf("muon %d: isTight %d \n", imuons, muon::isTightMuon(*nmuon, (*privtxs)[0]));
-       STAMu_numberOfChambers.push_back(nmuon->numberOfChambers());
-       STAMu_numberOfMatches.push_back(nmuon->numberOfMatches());
-       STAMu_numberOfHits.push_back(mutrackref->numberOfValidHits());
-       Mu_px_mu.push_back(nmuon->px());
-       Mu_py_mu.push_back(nmuon->py());
-       Mu_pz_mu.push_back(nmuon->pz());
-       Mu_phi_mu.push_back(nmuon->phi());
-       Mu_eta_mu.push_back(nmuon->eta());
-       STAMu_recHitsSize.push_back(mutrackref->recHitsSize());
-       STAMu_normchi2Mu.push_back(mutrackref->chi2()/mutrackref->ndof());
-       STAMu_chargeMu.push_back(mutrackref->charge());
-       STAMu_dxyMu.push_back(mutrackref->dxy(beamspot.position()));
-       STAMu_dzMu.push_back(mutrackref->dz(beamspot.position()));
-       int segmIndex = 0;
-       int segmWord = 0;
-       std::vector<int> segmIndex_container;
-       for (trackingRecHit_iterator recMu = mutrackref->recHitsBegin(); recMu!=mutrackref->recHitsEnd(); recMu++){
-          DetId detid = (*recMu)->geographicalId(); 
-          if(detid.subdetId() != MuonSubdetId::DT) continue;
-          DTChamberId recChamb(detid);
-          const short recWheel    = recChamb.wheel();
-          const short recSector    = recChamb.sector();
-          const short recStation = recChamb.station();
-          //loop over the saved segments and find the position of the rechits
-          //This is the quickest way to do this search: find the sector (highest number of
-          //combinations), loop over the find iterator, and search for wheel and stations
-          std::vector<short>::iterator sectorIt = std::find(segm4D_sector.begin(),segm4D_sector.end(),recSector);
-          while(sectorIt != segm4D_sector.end()){
+        if(!(nmuon->isStandAloneMuon())) continue;
+        if(imuons >= STAMuSize_) break;
+        const reco::TrackRef mutrackref = nmuon->outerTrack();
+        STAMu_isMuGlobal.push_back(nmuon->isGlobalMuon());
+        STAMu_isMuTracker.push_back(nmuon->isTrackerMuon());
+        STAMu_isMuLoose.push_back(muon::isLooseMuon(*nmuon));
+        STAMu_isMuMedium.push_back(muon::isMediumMuon(*nmuon));
+        STAMu_isMuTight.push_back(muon::isTightMuon(*nmuon, (*privtxs)[0]));
+        //printf("muon %d: isTight %d \n", imuons, muon::isTightMuon(*nmuon, (*privtxs)[0]));
+        STAMu_numberOfChambers.push_back(nmuon->numberOfChambers());
+        STAMu_numberOfMatches.push_back(nmuon->numberOfMatches());
+        STAMu_numberOfHits.push_back(mutrackref->numberOfValidHits());
+        Mu_px_mu.push_back(nmuon->px());
+        Mu_py_mu.push_back(nmuon->py());
+        Mu_pz_mu.push_back(nmuon->pz());
+        Mu_phi_mu.push_back(nmuon->phi());
+        Mu_eta_mu.push_back(nmuon->eta());
+        
+        // extrapolation of track coordinates
+        TrajectoryStateOnSurface stateAtMuSt1 = muPropagator1st_.extrapolate(*nmuon);
+        TrajectoryStateOnSurface stateAtMuSt2 = muPropagator2nd_.extrapolate(*nmuon);
+        
+        //printf("muon %d: eta %f, phi %f, pt %f, isTracker %d \n", imuons+1, nmuon->eta(), nmuon->phi(), nmuon->pt(), (int) nmuon->isTrackerMuon());
+        
+        if(stateAtMuSt1.isValid())
+        {
+            Mu_phiMB1_mu.push_back((double) stateAtMuSt1.globalPosition().phi());
+            Mu_etaMB1_mu.push_back((double) stateAtMuSt1.globalPosition().eta());
+            //printf("muon %d: etaMB1 %f, phiMB1 %f \n", imuons+1, (double) stateAtMuSt1.globalPosition().eta(), (double) stateAtMuSt1.globalPosition().phi());
+        }
+        else
+        {
+            Mu_phiMB1_mu.push_back(-9999);
+            Mu_etaMB1_mu.push_back(-9999);
+            //printf("muon %d: MB1 invalid. \n", imuons+1);
+        }
+        
+        if(stateAtMuSt2.isValid())
+        {
+            Mu_phiMB2_mu.push_back((double) stateAtMuSt2.globalPosition().phi());
+            Mu_etaMB2_mu.push_back((double) stateAtMuSt2.globalPosition().eta());
+            //printf("muon %d: etaMB2 %f, phiMB2 %f \n", imuons+1, (double) stateAtMuSt2.globalPosition().eta(), (double) stateAtMuSt2.globalPosition().phi());
+        }
+        else
+        {
+            Mu_phiMB2_mu.push_back(-9999);
+            Mu_etaMB2_mu.push_back(-9999);
+            //printf("muon %d: MB2 invalid. \n", imuons+1);
+        }
+        
+        STAMu_recHitsSize.push_back(mutrackref->recHitsSize());
+        STAMu_normchi2Mu.push_back(mutrackref->chi2()/mutrackref->ndof());
+        STAMu_chargeMu.push_back(mutrackref->charge());
+        STAMu_dxyMu.push_back(mutrackref->dxy(beamspot.position()));
+        STAMu_dzMu.push_back(mutrackref->dz(beamspot.position()));
+        int segmIndex = 0;
+        int segmWord = 0;
+        std::vector<int> segmIndex_container;
+        for (trackingRecHit_iterator recMu = mutrackref->recHitsBegin(); recMu!=mutrackref->recHitsEnd(); recMu++){
+            DetId detid = (*recMu)->geographicalId(); 
+            if(detid.subdetId() != MuonSubdetId::DT) continue;
+            DTChamberId recChamb(detid);
+            const short recWheel    = recChamb.wheel();
+            const short recSector    = recChamb.sector();
+            const short recStation = recChamb.station();
+            //loop over the saved segments and find the position of the rechits
+            //This is the quickest way to do this search: find the sector (highest number of
+            //combinations), loop over the find iterator, and search for wheel and stations
+            std::vector<short>::iterator sectorIt = std::find(segm4D_sector.begin(),segm4D_sector.end(),recSector);
+            while(sectorIt != segm4D_sector.end()){
     segmIndex = (short) distance(segm4D_sector.begin(),sectorIt);
     if(recWheel == segm4D_wheel.at(segmIndex) && recStation == segm4D_station.at(segmIndex))
        if(find(segmIndex_container.begin(),segmIndex_container.end(),segmIndex) == segmIndex_container.end()){
@@ -1265,13 +1306,23 @@ void TTreeGenerator::analyzeBMTF(const edm::Event& event)
                     Bmtf_trAddress.push_back(trAdd[3]);
                     Bmtf_trAddress.push_back(trAdd[4]);
                     Bmtf_trAddress.push_back(trAdd[5]);
+                    
+                    //printf("Bmtf_trAddress size = %d \n", (int) trAdd.size());
+                    //for(int iAdd = 0; iAdd < (int) trAdd.size(); iAdd++)
+                    //{
+                    //    printf("[%d] = %d \n", iAdd, trAdd[iAdd]);
+                    //}
                 } // for mu
                     Bmtf_Size = ctr;
      } // for i
     } //if
-    else 
-          edm::LogInfo("L1Prompt") << "can't find L1MuMBTrackContainer";
-          
+    else
+    {
+        printf("Cannot find BMTF collection. \n");
+        edm::LogInfo("L1Prompt") << "can't find L1MuMBTrackContainer";
+    }
+    
+    //printf("Bmtf_Size = %d \n", Bmtf_Size);
 
     edm::Handle<L1MuDTChambPhContainer> bmtfPhInputs;    
     event.getByToken(bmtfPhInputTag_, bmtfPhInputs);
@@ -1488,6 +1539,8 @@ void TTreeGenerator::beginJob()
     //muon variables
     tree_->Branch("Mu_isMuGlobal",&STAMu_isMuGlobal);
     tree_->Branch("Mu_isMuTracker",&STAMu_isMuTracker);
+    tree_->Branch("Mu_isMuLoose",&STAMu_isMuLoose);
+    tree_->Branch("Mu_isMuMedium",&STAMu_isMuMedium);
     tree_->Branch("Mu_isMuTight",&STAMu_isMuTight);
     tree_->Branch("Mu_numberOfChambers_sta",&STAMu_numberOfChambers);
     tree_->Branch("Mu_numberOfMatches_sta",&STAMu_numberOfMatches);
@@ -1498,6 +1551,10 @@ void TTreeGenerator::beginJob()
     tree_->Branch("Mu_pz",&Mu_pz_mu);
     tree_->Branch("Mu_phi",&Mu_phi_mu);
     tree_->Branch("Mu_eta",&Mu_eta_mu);
+    tree_->Branch("Mu_phiMB1",&Mu_phiMB1_mu);
+    tree_->Branch("Mu_etaMB1",&Mu_etaMB1_mu);
+    tree_->Branch("Mu_phiMB2",&Mu_phiMB2_mu);
+    tree_->Branch("Mu_etaMB2",&Mu_etaMB2_mu);
     tree_->Branch("Mu_recHitsSize",&STAMu_recHitsSize);
     tree_->Branch("Mu_normchi2_sta",&STAMu_normchi2Mu);
     tree_->Branch("Mu_charge",&STAMu_chargeMu);
@@ -1746,6 +1803,8 @@ inline void TTreeGenerator::clear_Arrays()
     //muon variables
     STAMu_isMuGlobal.clear();
     STAMu_isMuTracker.clear();
+    STAMu_isMuLoose.clear();
+    STAMu_isMuMedium.clear();
     STAMu_isMuTight.clear();
     STAMu_numberOfChambers.clear();
     STAMu_numberOfMatches.clear();
@@ -1757,6 +1816,10 @@ inline void TTreeGenerator::clear_Arrays()
     Mu_pz_mu.clear();
     Mu_phi_mu.clear();
     Mu_eta_mu.clear();
+    Mu_phiMB1_mu.clear();
+    Mu_etaMB1_mu.clear();
+    Mu_phiMB2_mu.clear();
+    Mu_etaMB2_mu.clear();
     STAMu_recHitsSize.clear();
     STAMu_normchi2Mu.clear();
     STAMu_chargeMu.clear();

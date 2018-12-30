@@ -1,0 +1,118 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      3607,        110]
+NotebookOptionsPosition[      3262,         94]
+NotebookOutlinePosition[      3597,        109]
+CellTagsIndexPosition[      3554,        106]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Needs", "[", "\"\<Notation`\>\"", "]"}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Symbolize", "[", 
+   RowBox[{"ParsedBoxWrapper", "[", 
+    RowBox[{"SubscriptBox", "[", 
+     RowBox[{"\"\<_\>\"", ",", "\"\<_\>\""}], "]"}], "]"}], "]"}], 
+  ";"}]}], "Input",
+ CellChangeTimes->{{3.729416027360154*^9, 3.729416050827425*^9}, 
+   3.7294165104084063`*^9, {3.729418140602178*^9, 3.72941814344339*^9}, {
+   3.729418308944893*^9, 3.729418311424203*^9}, {3.729418348555448*^9, 
+   3.729418349810895*^9}, {3.729418430922283*^9, 3.729418434745962*^9}, {
+   3.729418600218598*^9, 3.729418602585861*^9}, 3.729418697961833*^9, {
+   3.729418753041791*^9, 3.7294187578823233`*^9}, {3.729419482626501*^9, 
+   3.729419515522217*^9}, {3.729419723241943*^9, 3.729419733874366*^9}, 
+   3.729419835626822*^9, {3.7294209575780077`*^9, 3.729420957937693*^9}, 
+   3.729424020865987*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"f", "[", 
+   RowBox[{"x_", ",", "\[Mu]_", ",", "\[Sigma]_"}], "]"}], ":=", 
+  RowBox[{
+   FractionBox["1", 
+    RowBox[{
+     SqrtBox[
+      RowBox[{"2", "\[Pi]"}]], "\[Sigma]"}]], 
+   SuperscriptBox["\[ExponentialE]", 
+    RowBox[{"-", 
+     FractionBox[
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{"x", "-", "\[Mu]"}], ")"}], "2"], 
+      RowBox[{"2", 
+       SuperscriptBox["\[Sigma]", "2"]}]]}]]}]}]], "Input",
+ CellChangeTimes->{{3.730447668077055*^9, 3.730447757861195*^9}, {
+  3.730447809061534*^9, 3.73044785712749*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"A", "[", 
+   RowBox[{"\[Mu]_", ",", "\[Sigma]_", ",", 
+    RowBox[{
+     SubscriptBox["x", "0"], ":", "_"}]}], "]"}], ":=", 
+  RowBox[{"Integrate", "[", 
+   RowBox[{
+    RowBox[{"f", "[", 
+     RowBox[{"x", ",", "\[Mu]", ",", "\[Sigma]"}], "]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"x", ",", 
+      RowBox[{"-", "Infinity"}], ",", 
+      SubscriptBox["x", "0"]}], "}"}], ",", 
+    RowBox[{"Assumptions", "\[Rule]", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\[Mu]", ">", "0"}], ",", 
+       RowBox[{"\[Sigma]", ">", "0"}]}], "}"}]}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.730447873919773*^9, 3.730447956941276*^9}, {
+  3.7304480026698627`*^9, 3.730448019029264*^9}, {3.7304481236937*^9, 
+  3.7304481266616096`*^9}, {3.730448158085903*^9, 3.730448170509613*^9}, {
+  3.730448242701516*^9, 3.7304482554615507`*^9}, {3.730448449702815*^9, 
+  3.7304484505973787`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"A", "[", 
+  RowBox[{"\[Mu]", ",", "\[Sigma]", ",", 
+   SubscriptBox["x", "0"]}], "]"}]], "Input",
+ CellChangeTimes->{{3.7304484710972033`*^9, 3.730448484621318*^9}}]
+},
+WindowSize->{808, 909},
+WindowMargins->{{518, Automatic}, {24, Automatic}},
+FrontEndVersion->"11.0 for Linux x86 (64-bit) (July 28, 2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 1011, 21, 83, "Input"],
+Cell[1572, 43, 578, 18, 76, "Input"],
+Cell[2153, 63, 913, 23, 59, "Input"],
+Cell[3069, 88, 189, 4, 32, "Input"]
+}
+]
+*)
+

@@ -22,6 +22,9 @@
 <use name="TrackingTools/TransientTrack"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="SimDataFormats/DigiSimLinks"/>
+<use name="MuonAnalysis/MuonAssociators"/>
+<use name="TrackingTools/TrajectoryState"/>
+
 <flags   EDM_PLUGIN="1"/>
 
 

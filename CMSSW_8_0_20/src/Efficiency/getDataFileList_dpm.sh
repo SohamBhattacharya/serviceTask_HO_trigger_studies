@@ -3,9 +3,9 @@
 sourcePrefix="/dpm/indiacms.res.in/home/cms/store"
 
 jobID="@1@"
-sourceDir="user/sobhatta/@2@/crab_@2@"
-outDir="sourceFiles/@2@"
-outFile="@2@"
+sourceDir="user/sobhatta/@2@/crab_@3@"
+outDir="sourceFiles/@3@"
+outFile="@3@"
 
 filePrefix="root://se01.indiacms.res.in//store"
 
@@ -71,6 +71,8 @@ cat "$outFile_temp" | sort -V > "$tempFile"
 cat "$tempFile" > "$outFile_temp"
 
 rm -f "$tempFile"
+
+echo "Number of files:" `wc -l "$outFile_temp"`
 
 echo ""
 
